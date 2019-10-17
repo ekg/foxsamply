@@ -1,9 +1,46 @@
 #!/bin/bash
 
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
-script=$1
-record_time=$2
-out=$3
+# Initialize our own variables:
+input_file=""
+record_time=""
+output_file=""
+record_delay=1
+
+function show_help {
+    echo "foxsamply code to audio algorenderer"
+    echo "usage: $0 -f [code.foxdot] -s [record seconds] -o [output basename] -d [delay seconds]"
+}
+
+while getopts "h?f:s:o:d:" opt; do
+    case "$opt" in
+	h|\?)
+	    show_help
+	    exit 0
+	    ;;
+	s)  record_time=$OPTARG
+	    ;;
+	o)  output_file=$OPTARG
+	    ;;
+	f)  input_file=$OPTARG
+	    ;;
+	d)  record_delay=$OPTARG
+	    ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+if [ -z "$input_file" ] || [ -z "record_time" ] || [ -z "$output_file" ]
+then
+    show_help
+    exit 0
+fi
+
+#echo "verbose=$verbose, output_file='$output_file', Leftovers: $@"
+
 
 killall -KILL jackd
 killall -KILL Xvfb
@@ -20,12 +57,12 @@ sleep 3
 mkfifo foxy.sample.pipe
 cat foxy.sample.pipe | python -m FoxDot -p &
 sleep infinity > foxy.sample.pipe & # keep pipe open
-(cat $script; echo; echo) >>foxy.sample.pipe # write our thing into it
+(cat $input_file; echo; echo) >>foxy.sample.pipe # write our thing into it
 # wait not sec or two
-#sleep 2
+sleep $record_delay
 #sleep 0.5
-jack_rec -f $out.wav -d $record_time SuperCollider:out_1 SuperCollider:out_2
-lame -V2 $out.wav $out.mp3
+jack_rec -f $output_file.wav -d $record_time SuperCollider:out_1 SuperCollider:out_2
+lame -V2 $output_file.wav $output_file.mp3
 #sleep 5
 killall -KILL jackd
 killall -KILL Xvfb
