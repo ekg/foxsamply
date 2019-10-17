@@ -1,0 +1,33 @@
+#!/bin/bash
+
+
+script=$1
+record_time=$2
+out=$3
+
+killall -KILL jackd
+killall -KILL Xvfb
+rm -f foxy.sample.pipe
+sleep 3
+rm -f /tmp/.X99-lock
+export DISPLAY=:99
+Xvfb :99 -ac -screen 0 1280x1024x16 &
+jackd -d dummy &
+sleep 3
+echo FoxDot.start >/tmp/g && sclang /tmp/g &
+sleep 3
+#((sleep 5; cat $script| sed 's/\n/\n\n/g' ; echo; echo) | python -m FoxDot -p) &
+mkfifo foxy.sample.pipe
+cat foxy.sample.pipe | python -m FoxDot -p &
+sleep infinity > foxy.sample.pipe & # keep pipe open
+(cat $script; echo; echo) >>foxy.sample.pipe # write our thing into it
+# wait not sec or two
+#sleep 2
+#sleep 0.5
+jack_rec -f $out.wav -d $record_time SuperCollider:out_1 SuperCollider:out_2
+lame -V2 $out.wav $out.mp3
+#sleep 5
+killall -KILL jackd
+killall -KILL Xvfb
+kill $(jobs -p)
+rm -f foxy.sample.pipe
