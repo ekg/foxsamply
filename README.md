@@ -15,7 +15,9 @@ It depends on Xvfb (supercollider panics without X11), jack (we'll use a dummy s
 Running:
 
 ```
-foxsamply beats.foxdot 10 beats
+foxsamply -f beats.foxdot -s 10 -o beats
 ```
 
 ... will emit beats.mp3 and beats.wav.
+
+A recording start delay can be configured to deal with latency causing silence at the beginning of the recorded audio.
