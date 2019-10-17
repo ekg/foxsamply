@@ -1,8 +1,10 @@
 # foxsamply
 
-## a script to convert FoxDot code to recorded samples
+## algorenderer
 
-Usage:
+### a script to convert FoxDot code to recorded samples
+
+## Usage:
 
 ```
 foxsamply beats.foxdot 10 beats
